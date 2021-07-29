@@ -25,12 +25,12 @@ public struct Parsley {
 
   /// This parses a String into a Document, which contains parsed Metadata and the document title.
   public static func parse(_ content: String, options: MarkdownOptions = [.safe]) throws -> Document {
-    let (header, title, rawBody) = Parsley.parts(from: content)
+    let rawBody = content
 
-    let metadata = Parsley.metadata(from: header)
+    let metadata = Parsley.metadata(from: "")
     let bodyHtml = try Parsley.html(rawBody, options: options).trimmingCharacters(in: .newlines)
 
-    return Document(title: title, rawBody: rawBody, body: bodyHtml, metadata: metadata)
+    return Document(title: "", rawBody: rawBody, body: bodyHtml, metadata: metadata)
   }
 }
 
@@ -61,24 +61,4 @@ private extension Parsley {
     return Dictionary(pairs) { a, _ in a }
   }
 
-  /// Grabs the metadata (wrapped within `---`), the first title, and the body of the document.
-  static func parts(from content: String) -> (String?, String?, String) {
-    let scanner = Scanner(string: content)
-
-    var header: String? = nil
-    var title: String? = nil
-
-    if scanner.scanString("---") == "---" {
-      header = scanner.scanUpToString("---")
-      _ = scanner.scanString("---")
-    }
-
-    if scanner.scanString("# ") == "# " {
-      title = scanner.scanUpToString("\n")
-    }
-
-    let body = String(scanner.string[scanner.currentIndex...])
-
-    return (header, title, body)
-  }
 }
